@@ -66,7 +66,7 @@ esp_err_t ht8574_set_level(uint8_t pin, bool level)
     return ht8574_write_byte(NULL_I2C_MEM_ADDR, output_reg);
 }
 
-esp_err_t ht8574_read_output_pins(uint8_t *pin_val)
+esp_err_t ht8574_read_output_pins(uint16_t *pin_val)
 {
     ESP_RETURN_ON_FALSE(NULL != ht8574_handle, ESP_FAIL, TAG, "ht8574 is not initialized");
     esp_err_t ret = ht8574_read_byte(NULL_I2C_MEM_ADDR, &output_reg);
@@ -74,10 +74,13 @@ esp_err_t ht8574_read_output_pins(uint8_t *pin_val)
     return ret;
 }
 
-esp_err_t ht8574_read_input_pins(uint8_t *pin_val)
+esp_err_t ht8574_read_input_pins(uint16_t *pin_val)
 {
     ESP_RETURN_ON_FALSE(NULL != ht8574_handle, ESP_FAIL, TAG, "ht8574 is not initialized");
-    return ht8574_read_byte(NULL_I2C_MEM_ADDR, pin_val);
+    uint8_t val = 0;
+    esp_err_t ret = ht8574_read_byte(NULL_I2C_MEM_ADDR, &val);
+    *pin_val = val;
+    return ret;
 }
 
 
