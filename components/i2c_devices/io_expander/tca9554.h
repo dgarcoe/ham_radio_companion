@@ -32,8 +32,8 @@ extern "C" {
 esp_err_t tca9554_init(uint8_t i2c_addr);
 esp_err_t tca9554_set_direction(uint8_t pin, bool is_output);
 esp_err_t tca9554_set_level(uint8_t pin, bool level);
-esp_err_t tca9554_read_output_pins(uint8_t *pin_val);
-esp_err_t tca9554_read_input_pins(uint8_t *pin_val);
+esp_err_t tca9554_read_output_pins(uint16_t *pin_val);
+esp_err_t tca9554_read_input_pins(uint16_t *pin_val);
 
 esp_err_t tca9554_multi_write_start(void);
 esp_err_t tca9554_multi_write_new_level(int pin, bool new_level);

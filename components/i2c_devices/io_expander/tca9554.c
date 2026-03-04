@@ -86,7 +86,7 @@ esp_err_t tca9554_set_level(uint8_t pin, bool level)
     return tca9554_write_byte(TCA9554_OUTPUT_PORT_REG, output_reg);
 }
 
-esp_err_t tca9554_read_output_pins(uint8_t *pin_val)
+esp_err_t tca9554_read_output_pins(uint16_t *pin_val)
 {
     ESP_RETURN_ON_FALSE(NULL != tca9554_handle, ESP_FAIL, TAG, "tca9554 is not initialized");
     esp_err_t ret = tca9554_read_byte(TCA9554_OUTPUT_PORT_REG, &output_reg);
@@ -94,10 +94,13 @@ esp_err_t tca9554_read_output_pins(uint8_t *pin_val)
     return ret;
 }
 
-esp_err_t tca9554_read_input_pins(uint8_t *pin_val)
+esp_err_t tca9554_read_input_pins(uint16_t *pin_val)
 {
     ESP_RETURN_ON_FALSE(NULL != tca9554_handle, ESP_FAIL, TAG, "tca9554 is not initialized");
-    return tca9554_read_byte(TCA9554_INPUT_PORT_REG, pin_val);
+    uint8_t val = 0;
+    esp_err_t ret = tca9554_read_byte(TCA9554_INPUT_PORT_REG, &val);
+    *pin_val = val;
+    return ret;
 }
 
 
