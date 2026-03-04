@@ -110,7 +110,7 @@ static void lcd_task(void *args)
 esp_err_t bsp_lcd_init(void)
 {
     esp_err_t ret_val = ESP_OK;
-    board_res_desc_t *brd = bsp_board_get_description();
+    board_res_desc_t *brd = (board_res_desc_t *)bsp_board_get_description();
     if (!brd->FUNC_LCD_EN) {
         return ESP_OK;
     }
