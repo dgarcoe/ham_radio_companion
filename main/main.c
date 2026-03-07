@@ -8,18 +8,24 @@
 
 #include "indicator_model.h"
 #include "indicator_view.h"
-//#include "indicator_controller.h"
+#include "indicator_controller.h"
 
 static const char *TAG = "app_main";
 
-#define VERSION   "v1.0.0"
+#define VERSION   "v2.0.0"
 
-#define SENSECAP  "\n\
-   _____                      _________    ____         \n\
-  / ___/___  ____  ________  / ____/   |  / __ \\       \n\
-  \\__ \\/ _ \\/ __ \\/ ___/ _ \\/ /   / /| | / /_/ /   \n\
- ___/ /  __/ / / (__  )  __/ /___/ ___ |/ ____/         \n\
-/____/\\___/_/ /_/____/\\___/\\____/_/  |_/_/           \n\
+#define HAM_BANNER  "\n\
+  _   _                   ____           _ _         \n\
+ | | | | __ _ _ __ ___   |  _ \\ __ _  __| (_) ___   \n\
+ | |_| |/ _` | '_ ` _ \\  | |_) / _` |/ _` | |/ _ \\ \n\
+ |  _  | (_| | | | | | | |  _ < (_| | (_| | | (_) | \n\
+ |_| |_|\\__,_|_| |_| |_| |_| \\_\\__,_|\\__,_|_|\\___/ \n\
+   ____                                  _             \n\
+  / ___|___  _ __ ___  _ __   __ _ _ __ (_) ___  _ __  \n\
+ | |   / _ \\| '_ ` _ \\| '_ \\ / _` | '_ \\| |/ _ \\| '_ \\ \n\
+ | |__| (_) | | | | | | |_) | (_| | | | | | (_) | | | |\n\
+  \\____\\___/|_| |_| |_| .__/ \\__,_|_| |_|_|\\___/|_| |_|\n\
+                       |_|                              \n\
 --------------------------------------------------------\n\
  Version: %s %s %s\n\
 --------------------------------------------------------\n\
@@ -31,17 +37,17 @@ esp_event_loop_handle_t view_event_handle;
 
 void app_main(void)
 {
-    ESP_LOGI("", SENSECAP, VERSION, __DATE__, __TIME__);
+    ESP_LOGI("", HAM_BANNER, VERSION, __DATE__, __TIME__);
 
     ESP_ERROR_CHECK(bsp_board_init());
     lv_port_init();
 
 
     esp_event_loop_args_t view_event_task_args = {
-        .queue_size = 10,
+        .queue_size = 20,
         .task_name = "view_event_task",
         .task_priority = uxTaskPriorityGet(NULL),
-        .task_stack_size = 10240,
+        .task_stack_size = 12288,
         .task_core_id = tskNO_AFFINITY
     };
 

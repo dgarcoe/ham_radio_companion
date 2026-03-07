@@ -8,22 +8,21 @@ extern "C" {
 #endif
 
 enum start_screen{
-    SCREEN_SENSECAP_LOG, //todo
+    SCREEN_SENSECAP_LOG,
     SCREEN_WIFI_CONFIG,
 };
 
-
+/* ---------- WiFi Data ---------- */
 #define WIFI_SCAN_LIST_SIZE  15
 
 struct view_data_wifi_st
 {
     bool   is_connected;
     bool   is_connecting;
-    bool   is_network;  //is connect network
+    bool   is_network;
     char   ssid[32];
     int8_t rssi;
 };
-
 
 struct view_data_wifi_config
 {
@@ -47,124 +46,132 @@ struct view_data_wifi_list
     struct view_data_wifi_item aps[WIFI_SCAN_LIST_SIZE];
 };
 
-struct view_data_wifi_connet_ret_msg 
+struct view_data_wifi_connet_ret_msg
 {
-    uint8_t ret; //0:successfull , 1: failure
+    uint8_t ret;
     char    msg[64];
 };
 
+/* ---------- Display Data ---------- */
 struct view_data_display
 {
-    int   brightness; //0~100
-    bool  sleep_mode_en;       //Turn Off Screen
-    int   sleep_mode_time_min;  
+    int   brightness;
+    bool  sleep_mode_en;
+    int   sleep_mode_time_min;
 };
 
+/* ---------- Time Config ---------- */
 struct view_data_time_cfg
 {
     bool    time_format_24;
-
-    bool    auto_update; //time auto update
-    time_t  time;       // use when auto_update is true
-    bool    set_time; 
-
-    bool    auto_update_zone;  // use when  auto_update  is true
-    int8_t  zone;       // use when auto_update_zone is true
-    
-    bool    daylight;   // use when auto_update is true  
+    bool    auto_update;
+    time_t  time;
+    bool    set_time;
+    bool    auto_update_zone;
+    int8_t  zone;
+    bool    daylight;
 }__attribute__((packed));
 
-struct sensor_data_average
-{
-    float   data;  //Average over the past hour
-    time_t  timestamp;
-    bool    valid;
+/* ---------- Ham Radio Config ---------- */
+#define MAX_CALLSIGN_LEN    12
+#define MAX_GRID_LEN        8
+#define MAX_DX_HOST_LEN     64
+#define MAX_ALERT_PATTERN   32
+#define MAX_DX_SPOTS        50
+#define NUM_HF_BANDS        8  /* 80,60,40,30,20,17,15,10 */
+
+struct view_data_ham_config {
+    char callsign[MAX_CALLSIGN_LEN];
+    char grid[MAX_GRID_LEN];
+    uint8_t dx_source;        /* 0=HamQTH HTTP, 1=Telnet, 2=Both */
+    char dx_telnet_host[MAX_DX_HOST_LEN];
+    uint16_t dx_telnet_port;
+    char hamqth_user[32];
+    char hamqth_pass[32];
 };
 
-struct sensor_data_minmax
-{
-    float   max;
-    float   min;
-    time_t  timestamp;
-    bool    valid;
+/* ---------- Propagation Data ---------- */
+enum band_condition {
+    BAND_POOR = 0,
+    BAND_FAIR = 1,
+    BAND_GOOD = 2
 };
 
-enum sensor_data_type{
-    SENSOR_DATA_CO2,
-    SENSOR_DATA_TVOC,
-    SENSOR_DATA_TEMP,
-    SENSOR_DATA_HUMIDITY,
+struct view_data_propagation {
+    int sfi;
+    int a_index;
+    int k_index;
+    int sunspots;
+    char solar_wind[16];
+    char mag_field[16];
+    char signal_noise[16];
+    enum band_condition bands[NUM_HF_BANDS][2]; /* [band][0=day, 1=night] */
+    char band_names[NUM_HF_BANDS][8];
+    bool valid;
+    time_t last_update;
 };
 
-struct view_data_sensor_data
-{
-    enum sensor_data_type sensor_type;
-    float  vaule;
+/* ---------- DX Cluster Spot ---------- */
+struct view_data_dx_spot {
+    char dx_call[16];
+    char spotter[16];
+    float frequency;       /* kHz */
+    char comment[32];
+    time_t time;
+    bool alert_match;
 };
 
-struct view_data_sensor_history_data
-{
-    enum sensor_data_type sensor_type;
-    struct sensor_data_average data_day[24];
-    struct sensor_data_minmax data_week[7];
-    uint8_t resolution;
-    
-    float day_min;
-    float day_max;
-    
-    float week_min;
-    float week_max;
+struct view_data_dx_list {
+    struct view_data_dx_spot spots[MAX_DX_SPOTS];
+    uint16_t count;
+    bool connected;
 };
 
+/* ---------- Alert Config ---------- */
+struct view_data_alert_config {
+    bool enabled;
+    uint8_t bands_mask;    /* bitmask: bit0=80m, bit1=60m, ..., bit7=10m */
+    char callsign_pattern[MAX_ALERT_PATTERN];
+};
+
+/* ---------- Events ---------- */
 enum {
-    VIEW_EVENT_SCREEN_START = 0,  // uint8_t, enum start_screen, which screen when start
+    VIEW_EVENT_SCREEN_START = 0,
+    VIEW_EVENT_TIME,
 
-    VIEW_EVENT_TIME,  //  bool time_format_24
-    
-    VIEW_EVENT_WIFI_ST,   //view_data_wifi_st_t
-    VIEW_EVENT_CITY,      // char city[32], max display 24 char
+    VIEW_EVENT_WIFI_ST,
 
-    VIEW_EVENT_SENSOR_DATA, // struct view_data_sensor_data
-
-    VIEW_EVENT_SENSOR_TEMP,  
-    VIEW_EVENT_SENSOR_HUMIDITY,
-    VIEW_EVENT_SENSOR_TVOC,
-    VIEW_EVENT_SENSOR_CO2,
-
-    VIEW_EVENT_SENSOR_TEMP_HISTORY,
-    VIEW_EVENT_SENSOR_HUMIDITY_HISTORY,
-    VIEW_EVENT_SENSOR_TVOC_HISTORY,
-    VIEW_EVENT_SENSOR_CO2_HISTORY,
-
-    VIEW_EVENT_SENSOR_DATA_HISTORY, //struct view_data_sensor_history_data
-
-
-    VIEW_EVENT_WIFI_LIST,       //view_data_wifi_list_t
-    VIEW_EVENT_WIFI_LIST_REQ,   // NULL
-    VIEW_EVENT_WIFI_CONNECT,    // struct view_data_wifi_config
-
-    VIEW_EVENT_WIFI_CONNECT_RET,   // struct view_data_wifi_connet_ret_msg
-
-
+    VIEW_EVENT_WIFI_LIST,
+    VIEW_EVENT_WIFI_LIST_REQ,
+    VIEW_EVENT_WIFI_CONNECT,
+    VIEW_EVENT_WIFI_CONNECT_RET,
     VIEW_EVENT_WIFI_CFG_DELETE,
 
+    VIEW_EVENT_TIME_CFG_UPDATE,
+    VIEW_EVENT_TIME_CFG_APPLY,
 
-    VIEW_EVENT_TIME_CFG_UPDATE,  //  struct view_data_time_cfg
-    VIEW_EVENT_TIME_CFG_APPLY,   //  struct view_data_time_cfg
+    VIEW_EVENT_DISPLAY_CFG,
+    VIEW_EVENT_BRIGHTNESS_UPDATE,
+    VIEW_EVENT_DISPLAY_CFG_APPLY,
 
-    VIEW_EVENT_DISPLAY_CFG,         // struct view_data_display
-    VIEW_EVENT_BRIGHTNESS_UPDATE,   // uint8_t brightness
-    VIEW_EVENT_DISPLAY_CFG_APPLY,   // struct view_data_display. will save
+    VIEW_EVENT_SHUTDOWN,
+    VIEW_EVENT_FACTORY_RESET,
+    VIEW_EVENT_SCREEN_CTRL,
 
-
-    VIEW_EVENT_SHUTDOWN,      //NULL
-    VIEW_EVENT_FACTORY_RESET, //NULL
-    VIEW_EVENT_SCREEN_CTRL,   // bool  0:disable , 1:enable
+    /* Ham radio events */
+    VIEW_EVENT_PROPAGATION_DATA,
+    VIEW_EVENT_DX_SPOT_LIST,
+    VIEW_EVENT_DX_NEW_SPOT,
+    VIEW_EVENT_DX_ALERT,
+    VIEW_EVENT_HAM_CONFIG_UPDATE,
+    VIEW_EVENT_HAM_CONFIG_APPLY,
+    VIEW_EVENT_ALERT_CONFIG_UPDATE,
+    VIEW_EVENT_ALERT_CONFIG_APPLY,
+    VIEW_EVENT_DX_REFRESH_REQ,
+    VIEW_EVENT_DX_CONNECT_STATUS,
 
     VIEW_EVENT_ALL,
 };
-
-
 
 #ifdef __cplusplus
 }
