@@ -41,7 +41,7 @@ static void calendar_event_cb(lv_event_t * e)
     if(code == LV_EVENT_VALUE_CHANGED) {
         lv_calendar_date_t d;
         lv_calendar_get_pressed_date(obj, &d);
-        
+
         memcpy(&_g_date_cfg, &d, sizeof(lv_calendar_date_t));
 
         char buf[32];
@@ -252,56 +252,95 @@ static void __display_cfg_event_init(void)
 }
 
 
-/**********************  sensor chart **********************/
+/**********************  ham radio settings **********************/
 
-static void ui_event_sensor_co2_chart( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-    lv_obj_t * cur_screen = lv_scr_act();
-if ( event_code == LV_EVENT_CLICKED &&  cur_screen == ui_screen_sensor ) {
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_CO2_HISTORY, NULL, 0, portMAX_DELAY);
-
-    _ui_screen_change( ui_screen_sensor_chart, LV_SCR_LOAD_ANIM_OVER_LEFT, 200, 0);
-}
-}
-
-static void ui_event_sensor_tvoc_chart( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-    lv_obj_t * cur_screen = lv_scr_act();
-if ( event_code == LV_EVENT_CLICKED &&  cur_screen == ui_screen_sensor ) {
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_TVOC_HISTORY, NULL, 0, portMAX_DELAY);
-      _ui_screen_change( ui_screen_sensor_chart, LV_SCR_LOAD_ANIM_OVER_LEFT, 200, 0);
-}
-}
-static void ui_event_sensor_temp_chart( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-    lv_obj_t * cur_screen = lv_scr_act();
-if ( event_code == LV_EVENT_CLICKED &&  cur_screen == ui_screen_sensor ) {
-    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_TEMP_HISTORY, NULL, 0, portMAX_DELAY);
-      _ui_screen_change( ui_screen_sensor_chart, LV_SCR_LOAD_ANIM_OVER_LEFT, 200, 0);
-}
-}
-static void ui_event_sensor_humidity_chart( lv_event_t * e) {
-    lv_event_code_t event_code = lv_event_get_code(e);lv_obj_t * target = lv_event_get_target(e);
-    lv_obj_t * cur_screen = lv_scr_act();
-if ( event_code == LV_EVENT_CLICKED &&  cur_screen == ui_screen_sensor ) {
-     esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_SENSOR_HUMIDITY_HISTORY, NULL, 0, portMAX_DELAY);
-      _ui_screen_change( ui_screen_sensor_chart, LV_SCR_LOAD_ANIM_OVER_LEFT, 200, 0);
-}
-}
-
-static void __sensor_chart_event_init(void)
+static void __settings_ta_event_cb(lv_event_t *e)
 {
-    lv_obj_add_event_cb(ui_co2, ui_event_sensor_co2_chart, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_tvoc_2, ui_event_sensor_tvoc_chart, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_temp2, ui_event_sensor_temp_chart, LV_EVENT_ALL, NULL);
-    lv_obj_add_event_cb(ui_humidity2, ui_event_sensor_humidity_chart, LV_EVENT_ALL, NULL);
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_obj_t *ta = lv_event_get_target(e);
+    if (code == LV_EVENT_FOCUSED) {
+        lv_keyboard_set_textarea(ui_settings_kb, ta);
+        lv_obj_clear_flag(ui_settings_kb, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (code == LV_EVENT_DEFOCUSED) {
+        lv_obj_add_flag(ui_settings_kb, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+static void __settings_kb_event_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_READY || code == LV_EVENT_CANCEL) {
+        lv_obj_add_flag(ui_settings_kb, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+static void __ham_config_apply(void)
+{
+    struct view_data_ham_config cfg;
+    memset(&cfg, 0, sizeof(cfg));
+
+    const char *text;
+    text = lv_textarea_get_text(ui_callsign_ta);
+    if (text) strncpy(cfg.callsign, text, MAX_CALLSIGN_LEN - 1);
+
+    text = lv_textarea_get_text(ui_grid_ta);
+    if (text) strncpy(cfg.grid, text, MAX_GRID_LEN - 1);
+
+    cfg.dx_source = lv_dropdown_get_selected(ui_dx_source_dd);
+
+    text = lv_textarea_get_text(ui_telnet_host_ta);
+    if (text) strncpy(cfg.dx_telnet_host, text, MAX_DX_HOST_LEN - 1);
+
+    text = lv_textarea_get_text(ui_telnet_port_ta);
+    if (text) cfg.dx_telnet_port = atoi(text);
+
+    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_HAM_CONFIG_APPLY, &cfg, sizeof(cfg), portMAX_DELAY);
+}
+
+static void __alert_config_apply(void)
+{
+    struct view_data_alert_config cfg;
+    memset(&cfg, 0, sizeof(cfg));
+
+    cfg.enabled = lv_obj_has_state(ui_alert_en_cb, LV_STATE_CHECKED);
+
+    const char *text = lv_textarea_get_text(ui_alert_call_ta);
+    if (text) strncpy(cfg.callsign_pattern, text, MAX_ALERT_PATTERN - 1);
+
+    esp_event_post_to(view_event_handle, VIEW_EVENT_BASE, VIEW_EVENT_ALERT_CONFIG_APPLY, &cfg, sizeof(cfg), portMAX_DELAY);
+}
+
+static void __settings_screen_unloaded_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    if (code == LV_EVENT_SCREEN_UNLOADED) {
+        __ham_config_apply();
+        __alert_config_apply();
+    }
+}
+
+static void __ham_config_event_init(void)
+{
+    // Text area focus handling for keyboard
+    lv_obj_add_event_cb(ui_callsign_ta, __settings_ta_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_grid_ta, __settings_ta_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_telnet_host_ta, __settings_ta_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_telnet_port_ta, __settings_ta_event_cb, LV_EVENT_ALL, NULL);
+    lv_obj_add_event_cb(ui_alert_call_ta, __settings_ta_event_cb, LV_EVENT_ALL, NULL);
+
+    // Keyboard events
+    lv_obj_add_event_cb(ui_settings_kb, __settings_kb_event_cb, LV_EVENT_ALL, NULL);
+
+    // Save config when navigating away from settings screen
+    lv_obj_add_event_cb(ui_screen_settings, __settings_screen_unloaded_cb, LV_EVENT_SCREEN_UNLOADED, NULL);
 }
 
 int indicator_controller_init(void)
 {
     __time_cfg_envent_init();
     __display_cfg_event_init();
-    __sensor_chart_event_init();
+    __ham_config_event_init();
 
     return 0;
 }
