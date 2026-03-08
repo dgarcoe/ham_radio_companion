@@ -2,6 +2,7 @@
 #define VIEW_DATA_H
 
 #include "config.h"
+#include <time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -169,6 +170,7 @@ enum {
     VIEW_EVENT_ALERT_CONFIG_APPLY,
     VIEW_EVENT_DX_REFRESH_REQ,
     VIEW_EVENT_DX_CONNECT_STATUS,
+    VIEW_EVENT_CITY,
 
     VIEW_EVENT_ALL,
 };
