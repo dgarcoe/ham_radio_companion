@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "sdkconfig.h"
+#if CONFIG_IDF_TARGET_ESP32S3
+
 #include <string.h>
 #include "esp_log.h"
 #include "esp_check.h"
@@ -466,3 +469,5 @@ static esp_err_t _codec_set_voice_gain(uint8_t channel_mask, uint8_t volume)
 {
     return ESP_ERR_NOT_SUPPORTED;
 }
+
+#endif // CONFIG_IDF_TARGET_ESP32S3
