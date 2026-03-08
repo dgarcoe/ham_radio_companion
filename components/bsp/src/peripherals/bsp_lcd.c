@@ -97,7 +97,7 @@ IRAM_ATTR static bool on_vsync_event(
 }
 #endif
 
-#if CONFIG_LCD_AVOID_TEAR
+#if CONFIG_LCD_AVOID_TEAR && __has_include("esp_lcd_panel_rgb.h")
 static void lcd_task(void *args)
 {
     TickType_t tick;
@@ -197,7 +197,9 @@ esp_err_t bsp_lcd_init(void)
             .flags.swap_color_bytes = true,
         };
         ESP_ERROR_CHECK(esp_lcd_new_panel_io_i80(i80_bus, &io_config, &io_handle));
-    } else if (LCD_IFACE_RGB == brd->LCD_IFACE) {
+    }
+#if __has_include("esp_lcd_panel_rgb.h")
+    else if (LCD_IFACE_RGB == brd->LCD_IFACE) {
         esp_lcd_rgb_panel_config_t panel_config = {
             .clk_src = LCD_CLK_SRC_PLL160M,
             .data_width = brd->LCD_BUS_WIDTH,
@@ -249,6 +251,7 @@ esp_err_t bsp_lcd_init(void)
         esp_lcd_rgb_panel_register_event_callbacks(panel_handle, &cbs, NULL);
     }
 #endif
+#endif
     if (LCD_IFACE_RGB != brd->LCD_IFACE) {
         if (strstr(brd->LCD_DISP_IC_STR, "st7789")) {
             ESP_ERROR_CHECK(lcd_new_panel_st7789(io_handle, &panel_config, &panel_handle));
@@ -274,7 +277,7 @@ esp_err_t bsp_lcd_init(void)
     esp_lcd_panel_disp_off(panel_handle, false);
 #endif
 
-#if CONFIG_LCD_AVOID_TEAR
+#if CONFIG_LCD_AVOID_TEAR && __has_include("esp_lcd_panel_rgb.h")
         esp_lcd_rgb_panel_get_frame_buffer(panel_handle, 2, (void **)&lcd_buf0, (void **)&lcd_buf1);
         trans_ready = xSemaphoreCreateBinary();
         assert(trans_ready);
