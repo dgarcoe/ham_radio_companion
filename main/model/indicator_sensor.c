@@ -1,6 +1,8 @@
 #include "indicator_sensor.h"
+#include "indicator_storage.h"
 #include "driver/uart.h"
 #include "cobs.h"
+#include "esp_event.h"
 #include "esp_timer.h"
 #include "nvs.h"
 #include<stdlib.h>
@@ -524,7 +526,7 @@ static void __sensor_history_data_update_callback(void* arg)
     }
 }
 
-static __sensor_history_data_update_init(void)
+static void __sensor_history_data_update_init(void)
 {
     const esp_timer_create_args_t timer_args = {
             .callback = &__sensor_history_data_update_callback,

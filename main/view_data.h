@@ -135,6 +135,40 @@ struct view_data_alert_config {
     char callsign_pattern[MAX_ALERT_PATTERN];
 };
 
+/* ---------- Sensor Data ---------- */
+enum sensor_data_type {
+    SENSOR_DATA_TEMP = 0,
+    SENSOR_DATA_HUMIDITY,
+    SENSOR_DATA_CO2,
+    SENSOR_DATA_TVOC,
+};
+
+struct view_data_sensor_data {
+    enum sensor_data_type sensor_type;
+    float vaule;
+};
+
+struct sensor_data_average {
+    float data;
+    bool  valid;
+};
+
+struct sensor_data_minmax {
+    float min;
+    float max;
+    bool  valid;
+};
+
+struct view_data_sensor_history_data {
+    enum sensor_data_type sensor_type;
+    struct sensor_data_average data_day[24];
+    struct sensor_data_minmax  data_week[7];
+    float day_min;
+    float day_max;
+    float week_min;
+    float week_max;
+};
+
 /* ---------- Events ---------- */
 enum {
     VIEW_EVENT_SCREEN_START = 0,
@@ -171,6 +205,13 @@ enum {
     VIEW_EVENT_DX_REFRESH_REQ,
     VIEW_EVENT_DX_CONNECT_STATUS,
     VIEW_EVENT_CITY,
+
+    VIEW_EVENT_SENSOR_DATA,
+    VIEW_EVENT_SENSOR_DATA_HISTORY,
+    VIEW_EVENT_SENSOR_TEMP_HISTORY,
+    VIEW_EVENT_SENSOR_HUMIDITY_HISTORY,
+    VIEW_EVENT_SENSOR_CO2_HISTORY,
+    VIEW_EVENT_SENSOR_TVOC_HISTORY,
 
     VIEW_EVENT_ALL,
 };
