@@ -1,3 +1,6 @@
+#include "sdkconfig.h"
+#if CONFIG_IDF_TARGET_ESP32S3
+
 #include <stdlib.h>
 #include "radio.h"
 #include "sx126x-board.h"
@@ -187,7 +190,7 @@ void bsp_sx126x_init(void)
 
 void SX126xIoIrqInit( DioIrqHandler dioIrq )
 {
-    g_dioIrq = (uint32_t *)dioIrq;
+    g_dioIrq = (DioIrqHandler *)dioIrq;
 
     gpio_config_t io_conf = {};
     io_conf.intr_type = GPIO_INTR_NEGEDGE; //falling edge
@@ -435,3 +438,5 @@ uint32_t SX126xGetDio1PinState( void )
     return 0;
 }
 
+
+#endif // CONFIG_IDF_TARGET_ESP32S3
