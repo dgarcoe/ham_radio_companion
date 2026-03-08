@@ -42,6 +42,7 @@ static const char *TAG = "ESP32_I2S_LCD";
 #define LCD_DATA_MAX_WIDTH (24)  /*!< Maximum width of LCD data bus */
 #define gpio_pad_select_gpio(g) esp_rom_gpio_pad_select_gpio(g)
 #define ets_delay_us esp_rom_delay_us
+#define gpio_matrix_out(gpio, signal, inv, oen) esp_rom_gpio_connect_out_signal(gpio, signal, inv, oen)
 
 typedef struct {
     uint32_t dma_buffer_size;
