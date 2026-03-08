@@ -13,7 +13,9 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_vendor.h"
 #include "esp_lcd_panel_ops.h"
+#if __has_include("esp_lcd_panel_rgb.h")
 #include "esp_lcd_panel_rgb.h"
+#endif
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
@@ -78,6 +80,7 @@ static esp_err_t screen_clear(uint16_t color)
     return ESP_OK;
 }
 
+#if __has_include("esp_lcd_panel_rgb.h")
 IRAM_ATTR static bool on_vsync_event(
     esp_lcd_panel_handle_t panel,
     const esp_lcd_rgb_panel_event_data_t *edata,
@@ -92,6 +95,7 @@ IRAM_ATTR static bool on_vsync_event(
 
     return high_task_awoken == pdTRUE;
 }
+#endif
 
 #if CONFIG_LCD_AVOID_TEAR
 static void lcd_task(void *args)
