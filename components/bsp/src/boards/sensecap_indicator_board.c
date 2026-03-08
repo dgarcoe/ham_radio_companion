@@ -4,6 +4,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "sdkconfig.h"
+#if CONFIG_IDF_TARGET_ESP32S3
+
 #include <string.h>
 #include "esp_log.h"
 #include "esp_check.h"
@@ -305,3 +308,5 @@ const board_res_desc_t *bsp_board_sensecap_indicator_get_res_desc(void)
     return &g_board_lcd_evb_res;
 }
 
+
+#endif // CONFIG_IDF_TARGET_ESP32S3
