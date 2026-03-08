@@ -1,4 +1,5 @@
 #include "indicator_display.h"
+#include "indicator_storage.h"
 #include "freertos/semphr.h"
 
 #include "driver/ledc.h"

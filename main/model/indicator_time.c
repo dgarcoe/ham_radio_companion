@@ -1,4 +1,5 @@
 #include "indicator_time.h"
+#include "indicator_storage.h"
 #include "esp_sntp.h"
 #include "freertos/semphr.h"
 #include<stdlib.h>
@@ -71,12 +72,12 @@ static void __time_set(time_t time)
 
 static void __time_sync_enable(void)
 {
-    sntp_init();
+    esp_sntp_init();
 }
 
 static void __time_sync_stop(void)
 {
-    sntp_stop();
+    esp_sntp_stop();
 }
 
 static void __time_zone_set(struct view_data_time_cfg *p_cfg)
@@ -143,7 +144,7 @@ static void __time_view_update_callback(void* arg)
     }
 }
 
-static __time_view_update_init(void)
+static void __time_view_update_init(void)
 {
     const esp_timer_create_args_t timer_args = {
             .callback = &__time_view_update_callback,
@@ -234,10 +235,10 @@ int indicator_time_init(void)
 
     __time_cfg_restore();
 
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "pool.ntp.org");
-    sntp_setservername(1, "cn.ntp.org.cn");
-    sntp_set_time_sync_notification_cb(__time_sync_notification_cb);
+    esp_sntp_setoperatingmode(SNTP_OPMODE_POLL);
+    esp_sntp_setservername(0, "pool.ntp.org");
+    esp_sntp_setservername(1, "cn.ntp.org.cn");
+    esp_sntp_set_time_sync_notification_cb(__time_sync_notification_cb);
     
     struct view_data_time_cfg cfg;
     __time_cfg_get(&cfg);

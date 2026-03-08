@@ -9,7 +9,8 @@
 #include "esp_system.h"
 #include "esp_err.h"
 #include "esp_log.h"
-#include "esp_event_base.h"
+#include "esp_event.h"
+#include "esp_timer.h"
 #include "bsp_board.h"
 
 #include "freertos/FreeRTOS.h"
